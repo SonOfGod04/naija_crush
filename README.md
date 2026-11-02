@@ -38,12 +38,23 @@ Option B, from your computer:
 - Each player can only change their own rows, and only the receiver can claim a gift.
 - Only one device can be signed in to an account at a time. Signing in elsewhere signs the older device out within about a minute.
 - Nobody can stop a person from handing their password to a friend, but the one-device rule makes sharing awkward.
-- Points and scores are still calculated in the browser, so a determined player could cheat. For a stricter game, move scoring and gifting into Supabase database functions.
+
+### Server-side scoring
+Signed-in players' points, progress, stars, moral choices, donations, gifts and certificates live in the database. The browser can no longer write them; it only calls database functions:
+
+- `start_mission` / `complete_mission`: the server checks the mission is unlocked, the score and moves are plausible, and enough time has passed for the moves played. It then works out stars and Heart Points itself. Rewards per mission are capped, and replaying a finished mission pays only 10% plus any extra stars.
+- `record_choice`: the first answer to each moral dilemma counts once and cannot be replayed for extra points.
+- `donate`, `ask_help`, `give_help`, `cancel_help`: a player can only give points they actually have, and gifts move points between wallets in one step.
+- `claim_award`: the server checks the award criteria and issues the certificate serial.
+
+**What this does not do:** the game itself still runs in the browser, so the server cannot see every tile swap. A determined cheater could still send a made-up but plausible score for a mission. The caps and timing checks make that low-value, not impossible. To close the gap completely, the game moves would need to be sent to a Supabase Edge Function that replays them.
+
+Guests (not signed in) still score locally and do not appear on the leaderboard.
+
+After running the new `supabase.sql`, existing players start with a fresh server-side record. Lives are still kept in the browser.
 
 ## Alternative: GitHub Pages
 Settings > Pages > `main` branch, root folder. The same files work there.
 
 ## Culture facts
 Facts shown after each mission live in the `C` list in `index.html` (name|area|fact). Entries with an empty fact show a placeholder. Most facts come from the Nigerian Tourism Development Authority festival list and common knowledge; please have a member of each community review their entry before you promote the game.
-
-Let's go!
