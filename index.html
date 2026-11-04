@@ -115,7 +115,7 @@ select{width:100%;padding:10px;border-radius:10px;margin:6px 0;border:1px solid 
 <div class="scr" id="lb"><div class="hdr"><h2>🏆 Leaderboard</h2><button class="ibtn" id="lback">✕</button></div><p class="mute">Ranked by total Heart Points earned.</p><div id="lbl"></div></div>
 <div class="scr" id="fund"><div class="hdr"><h2>💚 Heart Fund</h2><button class="ibtn" id="fback">✕</button></div><p id="wal" style="font-weight:800"></p><p class="mute">Side quests: give the Heart Points you win to causes close to Naija’s heart. This is a game, so points are virtual and no real money is donated. To help for real, support a registered charity near you.</p><div id="fcards"></div></div>
 <div class="scr" id="help"><div class="hdr"><h2>🤝 Help Exchange</h2><button class="ibtn" id="hback">✕</button></div><p class="mute">Share, don’t beg: ask honestly when you truly need help, and give kindly when you can. Your Heart Points can lift another player.</p><div id="hcards"></div></div>
-<div class="scr" id="chat"><div class="hdr"><h2>🔥 Fireside Chat</h2><button class="ibtn" id="cback">✕</button></div><p class="mute" id="ctopic"></p><div id="clist" class="clist"></div><div class="crow"><input id="cin" maxlength="140" placeholder="Say something kind…"><button class="btn" id="csend" style="margin:0;padding:10px 16px;font-size:16px">Send</button></div><p class="mute">Be kind, honest and respectful. Tap 🚩 to report a message.</p></div>
+<div class="scr" id="chat"><div class="hdr"><h2>🔥 Fireside Chat</h2><button class="ibtn" id="cback">✕</button></div><p class="mute" id="ctopic"></p><div id="clist" class="clist"></div><div class="crow"><input id="cin" maxlength="140" placeholder="Say something kind…"><button class="btn" id="csend" style="margin:0;padding:10px 16px;font-size:16px">Send</button></div><p id="cstat" class="mute" style="color:#c0392b"></p><p class="mute">Be kind, honest and respectful. Tap 🚩 to report a message.</p></div>
 <div class="scr" id="hall"><div class="hdr"><h2>🏅 Hall of Honour</h2><button class="ibtn" id="hlback">✕</button></div><div id="hbody"></div></div>
 <div class="scr" id="game">
 <div class="hdr"><b id="stg"></b><span><b id="lives"></b> <button class="ibtn" id="sfxb">🔊</button> <button class="ibtn" id="musb">🎵</button> <button class="ibtn" id="pz">⏸</button></span></div>
@@ -514,7 +514,7 @@ function mstat(){$('mstat').textContent='❤️'+prog.lives+(prog.lives<5?' ('+w
 $('cast').innerHTML=[0,1,2,3,4].map(i=>'<div class="cm">'+por(S[i].av,i)+'<b>'+S[i].who+'</b><small>'+S[i].loc.split(',')[0]+'</small></div>').join('');
 for(let i=0;i<9;i++){const f=document.createElement('span');f.className='fl';f.textContent=T[i%6];f.style.left=(i*11+3)+'%';f.style.animationDelay=(i*.8)+'s';$('title').firstChild.appendChild(f)}
 $('nick').value=prog.nm||'';
-$('play').onclick=()=>{if(!auth)prog.nm=$('nick').value.trim().slice(0,14)||prog.nm||'Guest'+Math.floor(100+Math.random()*900);save();ac();music();renderMap();show('map')};
+$('play').onclick=()=>{if(sbOn()&&!auth&&REQ){amsg('Please sign in or create an account to play. 💚');return}if(!auth)prog.nm=$('nick').value.trim().slice(0,14)||prog.nm||'Guest'+Math.floor(100+Math.random()*900);save();ac();music();renderMap();show('map')};
 $('mhome').onclick=()=>show('title');
 $('tlb').onclick=()=>openLB('title');$('mlb').onclick=()=>openLB('map');
 $('tfund').onclick=()=>openFund('title');$('mfund').onclick=()=>openFund('map');
@@ -524,6 +524,7 @@ const SB={url:'https://iarezdekrbttimskdtsx.supabase.co',key:(window.NAIJA_CONFI
 const sbOn=()=>!!SB.key;
 let auth=null;try{auth=JSON.parse(localStorage.getItem('naijaAuth'))}catch(e){}
 const online=()=>sbOn()&&!!auth;
+const REQ=!(window.NAIJA_CONFIG&&window.NAIJA_CONFIG.requireSignin===false);
 const rpc=(fn,a)=>sb('rpc/'+fn,{method:'POST',body:JSON.stringify(a||{})});
 let pendStart=Promise.resolve();
 function applyState(st){if(!st)return;prog.hp=st.hp;prog.tot=st.tot;prog.u=st.u;prog.s=st.s;prog.vp=st.vp;prog.don=st.don||{};prog.ch=st.ch||{};prog.cert=st.cert||{};if(st.name)prog.nm=st.name;save()}
@@ -571,7 +572,7 @@ const D=[
 "Honesty|You notice your exam score was added up wrongly in your favour.|Tell the teacher|Keep quiet|Honest scores build real knowledge.",
 "Kindness|A classmate cannot pay for the school trip.|Help quietly|Make fun of them|Kindness lifts people quietly."
 ].map(x=>x.split('|'));
-function intro(i){const s=S[i];tick();
+function intro(i){const s=S[i];if(sbOn()&&REQ&&!auth){show('title');return}tick();
 if(prog.lives<=0){ov('<div class="big">💔</div><h2>No lives left</h2><p>Rest small, '+nick()+'. Next life in <b>'+wait()+'</b>.</p>',[['Back',()=>{renderMap();show('map')},1]]);return}
 const st=prog.s[i]||0,pv=i?S[i-1].who:'',d=D[i%D.length],l1=st?'Welcome back, '+nick()+'! '+bond(st)+' — I dey happy to see you.':(i?pv+' talk well well about you, '+nick()+'!':'Hey '+nick()+'! Welcome to Naija!');
 const o=[[d[2],1],[d[3],0]];if(i%2)o.reverse();
@@ -667,10 +668,10 @@ if(!e||p.length<6){amsg('Enter your email and a password of 6+ characters.');ret
 amsg('Creating account…');try{const t=await sb('players?select=id&name=ilike.'+encodeURIComponent(n)+'&limit=1');if(t&&t.length){amsg('That nickname is taken. Try another.');return}
 const j=await au('signup',{email:e,password:p,data:{name:n}});
 if(j.access_token){auth=null;prog.nm=n;setAuth(j);await loadProfile(true);renderAuth();amsg('');shout('Account created! 🎉')}else amsg('Account created! Check your email to confirm it, then sign in.')}catch(x){amsg(x.message)}}
-function renderAuth(){const on=sbOn();$('authbox').style.display=on&&!auth?'block':'none';$('who').style.display=on&&auth?'block':'none';$('nick').style.display=auth?'none':'block';
+function renderAuth(){const on=sbOn();$('play').textContent=(on&&!auth&&REQ)?'🔒 Sign in to play':'▶ PLAY NOW';$('authbox').style.display=on&&!auth?'block':'none';$('who').style.display=on&&auth?'block':'none';$('nick').style.display=auth?'none':'block';
 if(on&&auth){const w=$('who');w.innerHTML='';w.appendChild(el('p','','Signed in as '+nick()+' ✅'));const b=el('button','pill','Sign out');b.onclick=()=>{auth=null;authSave();try{localStorage.removeItem('naijaCrush')}catch(e){}location.reload()};w.appendChild(b)}}
 async function chk(){if(!auth)return;try{const ok=await rpc('session_ok',{p_sid:auth.sid});if(ok===false){auth=null;authSave();try{localStorage.removeItem('naijaCrush')}catch(e){}ov('<div class="big">🔒</div><h2>Signed out</h2><p>This account was opened on another device.</p>',[['OK',()=>location.reload()]])}}catch(e){}}
-$('diag').textContent=sbOn()?'Online features connected ✓':(window.NAIJA_CONFIG?'Online sign-in is off: config.js loaded, but supabaseKey is empty.':'Online sign-in is off: config.js was not found. Upload it next to index.html.');$('si').onclick=doSignin;$('su').onclick=doSignup;renderAuth();
+$('diag').textContent=sbOn()?'Online features connected ✓':(window.NAIJA_CONFIG?'Online sign-in is off: config.js loaded, but supabaseKey is empty.':'Online sign-in is off: config.js was not found. Upload it next to index.html.');$('si').onclick=doSignin;$('su').onclick=doSignup;renderAuth();if(sbOn()&&!auth&&REQ)amsg('Create an account (nickname, email, password) or sign in to play.');
 if(auth){loadProfile(false).then(()=>{renderAuth();chk()});setInterval(chk,60000)}
 /* fireside chat */
 $('mchat').onclick=()=>openChat('map');$('mhall').onclick=()=>openHall('map');$('cback').onclick=()=>show(bk);$('hlback').onclick=()=>show(bk);
@@ -682,9 +683,9 @@ $('csend').disabled=false;
 try{const r=await sb('chat?select=id,uid,name,body,ts&hidden=eq.false&order=ts.desc&limit=50');c.innerHTML='';
 r.reverse().forEach(m=>{const d=el('div','msg'),t=new Date(m.ts);d.appendChild(el('b','',m.name+' '));d.appendChild(document.createTextNode(m.body+' '));d.appendChild(el('small','',t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')));
 if(m.uid!==prog.pid){const f=el('button','',' 🚩');f.style.cssText='border:0;background:none;cursor:pointer;opacity:.5';f.onclick=async()=>{try{await sb('chat_reports',{method:'POST',prefer:'return=minimal',body:JSON.stringify({msg_id:m.id,reporter:prog.pid})});shout('Thanks, we will look at it. 🙏')}catch(e){shout('Already reported')}};d.appendChild(f)}c.appendChild(d)});
-if(!r.length)c.appendChild(el('p','mute','No one has spoken yet. Be the first to warm the fire! 🔥'));c.scrollTop=c.scrollHeight}catch(e){c.innerHTML='<p class="mute">Could not load the chat. Try again.</p>'}}
+if(!r.length)c.appendChild(el('p','mute','No one has spoken yet. Be the first to warm the fire! 🔥'));c.scrollTop=c.scrollHeight}catch(e){c.innerHTML='';c.appendChild(el('p','mute','Could not load the chat: '+(e.message||e)+'. If it says the table was not found, run the latest supabase.sql.'))}}
 $('csend').onclick=async()=>{const i=$('cin'),t=i.value.trim();if(!t||!auth)return;if(Date.now()-lastSend<4000){shout('Easy, take a breath 😄');return}lastSend=Date.now();i.value='';
-try{await sb('chat',{method:'POST',prefer:'return=minimal',body:JSON.stringify({uid:prog.pid,name:nick(),body:t.slice(0,140)})})}catch(e){shout('Could not send. Try again')}renderChat()};
+try{await sb('chat',{method:'POST',prefer:'return=minimal',body:JSON.stringify({uid:prog.pid,name:nick(),body:t.slice(0,140)})})}catch(e){$('cstat').textContent='Could not send: '+(e.message||e)+(String(e.message).includes('chat')?' (run the latest supabase.sql in Supabase)':'');shout('Could not send');i.value=t;return}$('cstat').textContent='';renderChat()};
 $('cin').onkeydown=e=>{if(e.key==='Enter')$('csend').click()};
 setInterval(()=>{if($('chat').classList.contains('on'))renderChat()},8000);
 /* awards */
@@ -710,7 +711,7 @@ x.textAlign='center';x.fillStyle='#008751';x.font='bold 30px Georgia,serif';x.fi
 x.fillStyle='#10301b';x.font='bold 64px Georgia,serif';x.fillText('Certificate of Honour',600,235);
 x.fillStyle='#52705b';x.font='26px Georgia,serif';x.fillText('This certificate is proudly awarded to',600,315);
 x.fillStyle='#b87d00';x.font='bold 76px Georgia,serif';x.fillText(nick(),600,415);
-x.fillStyle='#10301b';x.font='bold 50px Georgia,serif';x.fillText(a[1]+' '+a[2],600,50);
+x.fillStyle='#10301b';x.font='bold 50px Georgia,serif';x.fillText(a[1]+' '+a[2],600,505);
 x.fillStyle='#52705b';x.font='26px Georgia,serif';let ln='',y=565;('Awarded '+a[3]+' After 250 missions across the cultures of Nigeria.').split(' ').forEach(w=>{if(x.measureText(ln+w).width>900){x.fillText(ln,600,y);y+=36;ln=''}ln+=w+' '});x.fillText(ln,600,y);
 x.font='22px Georgia,serif';x.textAlign='left';x.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}),120,740);x.textAlign='right';x.fillText('Serial '+ser,1080,740);
 x.textAlign='center';x.font='italic 30px Georgia,serif';x.fillStyle='#008751';x.fillText('Mama Naija',600,730);x.fillStyle='#52705b';x.font='18px Georgia,serif';x.fillText('Honesty · Integrity · Responsibility',600,765);
