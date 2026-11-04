@@ -89,6 +89,10 @@ body{background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;color:var(--
 .fq h3{margin:0 0 4px}.pb{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;margin:8px 0}.pb div{height:100%;background:linear-gradient(90deg,#14b46c,#f2a900)}
 .fq .pill{padding:6px 12px}.fq .pill:disabled{opacity:.4}
 select{width:100%;padding:10px;border-radius:10px;margin:6px 0;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-size:15px}
+.clist{height:46vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px}
+.msg{margin:6px 0;font-size:14px}.msg b{color:var(--g)}.msg small{color:var(--mute)}
+.crow{display:flex;gap:8px;margin:8px 0}.crow input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-size:15px}
+.cert{width:100%;border-radius:10px;border:1px solid var(--bd)}
 </style></head><body>
 <div class="scr on" id="title"><div class="hero">
 <div class="band"></div>
@@ -105,12 +109,14 @@ select{width:100%;padding:10px;border-radius:10px;margin:6px 0;border:1px solid 
 <div class="band"></div></div></div>
 <div class="scr" id="map">
 <div class="hdr"><h2>Your missions</h2><b id="mstat"></b></div>
-<div class="pills"><button class="pill" id="mhome">🏠 Home</button><button class="pill" id="mlb">🏆 Leaders</button><button class="pill" id="mfund">💚 Heart Fund</button><button class="pill" id="mhelp">🤝 Help</button></div>
+<div class="pills"><button class="pill" id="mhome">🏠 Home</button><button class="pill" id="mlb">🏆 Leaders</button><button class="pill" id="mfund">💚 Heart Fund</button><button class="pill" id="mhelp">🤝 Help</button><button class="pill" id="mchat">🔥 Fireside</button><button class="pill" id="mhall" style="display:none">🏅 Honour</button></div>
 <div id="stages"></div>
 </div>
 <div class="scr" id="lb"><div class="hdr"><h2>🏆 Leaderboard</h2><button class="ibtn" id="lback">✕</button></div><p class="mute">Ranked by total Heart Points earned.</p><div id="lbl"></div></div>
 <div class="scr" id="fund"><div class="hdr"><h2>💚 Heart Fund</h2><button class="ibtn" id="fback">✕</button></div><p id="wal" style="font-weight:800"></p><p class="mute">Side quests: give the Heart Points you win to causes close to Naija’s heart. This is a game, so points are virtual and no real money is donated. To help for real, support a registered charity near you.</p><div id="fcards"></div></div>
 <div class="scr" id="help"><div class="hdr"><h2>🤝 Help Exchange</h2><button class="ibtn" id="hback">✕</button></div><p class="mute">Share, don’t beg: ask honestly when you truly need help, and give kindly when you can. Your Heart Points can lift another player.</p><div id="hcards"></div></div>
+<div class="scr" id="chat"><div class="hdr"><h2>🔥 Fireside Chat</h2><button class="ibtn" id="cback">✕</button></div><p class="mute" id="ctopic"></p><div id="clist" class="clist"></div><div class="crow"><input id="cin" maxlength="140" placeholder="Say something kind…"><button class="btn" id="csend" style="margin:0;padding:10px 16px;font-size:16px">Send</button></div><p class="mute">Be kind, honest and respectful. Tap 🚩 to report a message.</p></div>
+<div class="scr" id="hall"><div class="hdr"><h2>🏅 Hall of Honour</h2><button class="ibtn" id="hlback">✕</button></div><div id="hbody"></div></div>
 <div class="scr" id="game">
 <div class="hdr"><b id="stg"></b><span><b id="lives"></b> <button class="ibtn" id="sfxb">🔊</button> <button class="ibtn" id="musb">🎵</button> <button class="ibtn" id="pz">⏸</button></span></div>
 <div class="talk"><div class="av" id="av"></div><div id="msg"></div></div>
@@ -383,7 +389,7 @@ const S=C.map((x,i)=>{const[n,loc,fact]=x.split('|'),u=loc==='Nationwide',r=ROLE
 w.forEach((f,j)=>{g[(a+j*2)%nk]=Math.max(5,Math.round(need*f))});
 return{n,loc,who:u?'Mama Naija':r[0]+' '+n.split(' ')[0],av:u?'👩🏾‍🦳':r[1],say:(u?'Let us celebrate together! ':'You are visiting the '+n+' of '+loc+'. ')+TPL[i%6],fact:fact||'The '+n+' people live mainly in '+loc+'. Ask a friend from this community about their food, greetings and festivals, because culture is best learned from the people themselves!',g,sc:sp?Math.round(mv*(55+35*t)/50)*50:0,mv,sp,nk,seed:3+Math.floor(i/60)}});
 const praise=['Correct!','Sweet die!','Omo!','E don happen!','No be small thing!','Oga at the top!'];
-let g=[],sp=[],nk=6,lf={s:0,k:0,m:0},smashing=false,curBm=0,bk='title',sel=-1,score=0,moves=0,cur=0,busy=false,paused=false,goals={},fresh=new Set(),pop=new Set(),bonusPts=0,prog={u:0,s:[],hp:0,tot:0,don:{},lives:5,lt:0,nm:'',vp:0,pid:''};
+let g=[],sp=[],nk=6,lf={s:0,k:0,m:0},smashing=false,curBm=0,bk='title',sel=-1,score=0,moves=0,cur=0,busy=false,paused=false,goals={},fresh=new Set(),pop=new Set(),bonusPts=0,prog={u:0,s:[],hp:0,tot:0,don:{},lives:5,lt:0,nm:'',vp:0,pid:'',ch:{},cert:{}};
 const $=id=>document.getElementById(id);
 try{const p=JSON.parse(localStorage.getItem('naijaCrush'));if(p&&typeof p.u==='number')prog=Object.assign(prog,p)}catch(e){}
 function save(){try{localStorage.setItem('naijaCrush',JSON.stringify(prog))}catch(e){}}
@@ -417,7 +423,7 @@ const goalTxt=s=>Object.keys(s.g).map(t=>T[t]+' ×'+s.g[t]).concat(s.sc?['⭐ '+
 /* ---------- screens ---------- */
 $('pz').onclick=()=>{if(busy&&!paused&&$('ov').classList.contains('on'))return;paused=true;music();
 ov('<div class="big">⏸</div><h2>Game paused</h2><p class="mute">Rest small, oga.</p>',[['▶ Resume',()=>{paused=false;music()}],['↻ Restart stage',()=>begin(cur),1],['🗺 Mission map',()=>{paused=false;renderMap();show('map');music()},1]])};
-function begin(i,r,bm){if(bm!==undefined)curBm=bm;cur=i;const s=S[i];goals={...s.g};nk=s.nk;lf={s:1,k:1,m:1};smashing=false;score=0;moves=s.mv+curBm;sel=-1;paused=false;busy=false;fresh=new Set();pop=new Set();fill();if(s.sp)seed(s.seed);
+function begin(i,r,bm){if(bm!==undefined)curBm=bm;if(online())pendStart=rpc('start_mission',{p_i:i}).catch(()=>{});cur=i;const s=S[i];goals={...s.g};nk=s.nk;lf={s:1,k:1,m:1};smashing=false;score=0;moves=s.mv+curBm;sel=-1;paused=false;busy=false;fresh=new Set();pop=new Set();fill();if(s.sp)seed(s.seed);
 $('av').textContent=s.av;$('av').className='por sm';$('av').style.setProperty('--h',hue(i));$('stg').textContent='Stage '+(i+1)+': '+s.n;say(s.who+': '+(r||'Make we go!'));show('game');render();music();shout('Stage '+(i+1)+': '+s.loc+' 🇳🇬')}
 /* ---------- board ---------- */
 function fill(){g=[];sp=Array(N*N).fill(0);for(let r=0;r<N;r++)for(let c=0;c<N;c++){let v;do{v=rnd()}while((c>=2&&g[r*N+c-1]===v&&g[r*N+c-2]===v)||(r>=2&&g[(r-1)*N+c]===v&&g[(r-2)*N+c]===v));g[r*N+c]=v}if(!hasMove())fill()}
@@ -517,12 +523,16 @@ $('lback').onclick=()=>show(bk);$('fback').onclick=()=>{if(bk==='map')renderMap(
 const SB={url:'https://iarezdekrbttimskdtsx.supabase.co',key:(window.NAIJA_CONFIG&&window.NAIJA_CONFIG.supabaseKey)||'sb_publishable_c7sk3lI_Z4C8l4k2CK1lLA_2EO_NkbH'};
 const sbOn=()=>!!SB.key;
 let auth=null;try{auth=JSON.parse(localStorage.getItem('naijaAuth'))}catch(e){}
-async function sb(path,o){o=o||{};const h={apikey:SB.key,'Content-Type':'application/json'},tk=await tok();if(auth)h.Authorization='Bearer '+tk;if(o.prefer)h.Prefer=o.prefer;const r=await fetch(SB.url+'/rest/v1/'+path,{method:o.method||'GET',headers:h,body:o.body});if(!r.ok)throw new Error(r.status);const t=await r.text();return t?JSON.parse(t):null}
+const online=()=>sbOn()&&!!auth;
+const rpc=(fn,a)=>sb('rpc/'+fn,{method:'POST',body:JSON.stringify(a||{})});
+let pendStart=Promise.resolve();
+function applyState(st){if(!st)return;prog.hp=st.hp;prog.tot=st.tot;prog.u=st.u;prog.s=st.s;prog.vp=st.vp;prog.don=st.don||{};prog.ch=st.ch||{};prog.cert=st.cert||{};if(st.name)prog.nm=st.name;save()}
+async function sb(path,o){o=o||{};const h={apikey:SB.key,'Content-Type':'application/json'},tk=await tok();if(auth)h.Authorization='Bearer '+tk;if(o.prefer)h.Prefer=o.prefer;const r=await fetch(SB.url+'/rest/v1/'+path,{method:o.method||'GET',headers:h,body:o.body});if(!r.ok){let m=r.status;try{m=(await r.json()).message||m}catch(e){}throw new Error(m)}const t=await r.text();return t?JSON.parse(t):null}
 if(!prog.pid){prog.pid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'p'+Math.random().toString(36).slice(2)+Date.now();save()}
 if(auth)prog.pid=auth.uid;
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 $('mhelp').onclick=()=>openHelp('map');$('hback').onclick=()=>show(bk);
-function renderMap(){const c=$('stages');c.innerHTML='';updLives();mstat();const top=Math.min(S.length-1,prog.u+2);
+function renderMap(){const c=$('stages');c.innerHTML='';$('mhall').style.display=prog.u>=240?'inline-block':'none';updLives();mstat();const top=Math.min(S.length-1,prog.u+2);
 for(let i=0;i<=top;i++){const s=S[i],lk=i>prog.u,d=document.createElement('div');d.className='st'+(lk?' lock':'');
 d.innerHTML=(lk?'<div class="por sm" style="--h:0;filter:grayscale(1)">🔒</div>':por(s.av,i,'sm'))+'<div><b></b><small></small><br><small></small></div>';
 const q=d.querySelectorAll('b,small');q[0].textContent=(i+1)+'. '+s.n+(s.sp?' ⚡':'');q[1].textContent=s.loc+' · '+s.who;q[2].textContent=(lk?'Locked':bond(prog.s[i]))+(prog.s[i]?'  '+'⭐'.repeat(prog.s[i]):'');
@@ -567,9 +577,9 @@ const st=prog.s[i]||0,pv=i?S[i-1].who:'',d=D[i%D.length],l1=st?'Welcome back, '+
 const o=[[d[2],1],[d[3],0]];if(i%2)o.reverse();
 ov(por(s.av,i,'big')+'<h2></h2><small class="mute"></small><div class="bub"></div><div class="bub"></div><div class="bub"></div>',[]);
 const b=$('box'),q=b.querySelectorAll('h2,small,.bub');q[0].textContent=s.who;q[1].textContent=s.loc+' · '+bond(st);q[2].textContent=l1;q[3].textContent=s.say+' '+goalTxt(s);q[4].textContent='🕊️ '+d[0]+': '+d[1];
-o.forEach(([t,gd])=>{const x=el('button','btn',t);x.onclick=()=>{$('ov').classList.remove('on');pick(i,gd,d)};b.appendChild(x)});
+o.forEach(([t,gd],pos)=>{const x=el('button','btn',t);x.onclick=()=>{$('ov').classList.remove('on');pick(i,gd,d,pos)};b.appendChild(x)});
 const bk2=el('button','btn alt','Back');bk2.onclick=()=>{$('ov').classList.remove('on');show('map')};b.appendChild(bk2)}
-function pick(i,good,d){const s=S[i];if(good){prog.vp++;save();sfx.win()}
+function pick(i,good,d,pos){const s=S[i];if(online()){rpc('record_choice',{p_i:i,p_pick:pos}).then(applyState).catch(()=>{})}else{prog.ch=prog.ch||{};if(prog.ch[i]===undefined){prog.ch[i]=good?1:0;if(good)prog.vp++}save()}if(good)sfx.win();
 ov(por(s.av,i,'big')+'<div class="bub"></div>',[['Start mission 🔥',()=>begin(i,good?'I knew you were a good person! 💚':'We all learn, my friend. Let’s go!',good?2:0)]]);
 $('box').querySelector('.bub').textContent=good?'Ah, that is the way. '+d[0]+' wins! ✨ +2 bonus moves':'Hmm. '+d[4]+' Next time: '+d[2].toLowerCase()+'.'}
 /* help exchange */
@@ -577,27 +587,22 @@ const RS=['School books and supplies','Food for my family','Transport fare to sc
 function openHelp(f){bk=f;show('help');renderHelp()}
 function hcard(r,mineF,sum){const b=el('div','fq');b.appendChild(el('h3','',(mineF?'🙏 Your request: ':'🤝 '+r.name+' needs: ')+r.reason));
 const pb=el('div','pb'),f=el('div');f.style.width=Math.min(100,sum/r.need*100)+'%';pb.appendChild(f);b.appendChild(pb);b.appendChild(el('small','',sum+' / '+r.need+' 💚'));
-if(mineF){const x=el('button','pill','Cancel request');x.onclick=async()=>{try{await sb('help_requests?id=eq.'+r.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({open:false})})}catch(e){}renderHelp()};b.appendChild(x)}
+if(mineF){const x=el('button','pill','Cancel request');x.onclick=async()=>{try{await rpc('cancel_help')}catch(e){}renderHelp()};b.appendChild(x)}
 else[50,100].forEach(a=>{const x=el('button','pill','Give '+a);x.disabled=prog.hp<a;x.onclick=()=>giveHelp(r,a);b.appendChild(x)});return b}
-async function giveHelp(r,a){if(prog.hp<a)return;prog.hp-=a;save();
-try{await sb('gifts',{method:'POST',prefer:'return=minimal',body:JSON.stringify({req_id:r.id,to_pid:r.pid,from_pid:prog.pid,from_name:nick(),amount:a})});prog.don.h=(prog.don.h||0)+a;save();syncLB();shout('💚 You gave '+a+' to '+r.name+'. Oshey!');sfx.win();burst()}
-catch(e){prog.hp+=a;save();shout('Could not send. Try again')}renderHelp()}
+async function giveHelp(r,a){if(prog.hp<a)return;try{applyState(await rpc('give_help',{p_req:r.id,p_amt:a}));shout('💚 You gave '+a+' to '+r.name+'. Oshey!');sfx.win();burst()}catch(e){shout(String(e.message).includes('not_enough')?'Not enough points':'Could not send. Try again')}renderHelp()}
 async function renderHelp(){const c=$('hcards');
 if(!sbOn()){c.innerHTML='<p class="mute">The Help Exchange runs in the online version of the game, once it is connected to its server.</p>';return}
 if(!auth){c.innerHTML='<p class="mute">Please sign in on the home screen to use the Help Exchange.</p>';return}
 c.innerHTML='<p class="mute">Loading…</p>';
-try{
-const gs=await sb('gifts?select=amount,from_name&to_pid=eq.'+prog.pid+'&claimed=eq.false');
-if(gs.length){const t=gs.reduce((a,x)=>a+x.amount,0);prog.hp+=t;save();await sb('gifts?to_pid=eq.'+prog.pid+'&claimed=eq.false',{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({claimed:true})});shout('💚 +'+t+' from '+[...new Set(gs.map(x=>x.from_name))].slice(0,2).join(' & ')+'!');burst();sfx.win()}
+try{const before=prog.hp;applyState(await rpc('get_state'));if(prog.hp>before){shout('💚 +'+(prog.hp-before)+' from fellow players!');burst();sfx.win()}
 const rq=await sb('help_requests?select=id,pid,name,reason,need&open=eq.true&order=ts.desc&limit=20'),sums={};
 if(rq.length)(await sb('gifts?select=req_id,amount&req_id=in.('+rq.map(r=>r.id).join(',')+')')).forEach(x=>{sums[x.req_id]=(sums[x.req_id]||0)+x.amount});
 const my=rq.find(r=>r.pid===prog.pid);
-if(my&&(sums[my.id]||0)>=my.need){await sb('help_requests?id=eq.'+my.id,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({open:false})});shout('Your request is fully funded! 🙏');renderHelp();return}
 c.innerHTML='';c.appendChild(el('p','','Your wallet: 💚 '+prog.hp)).style.fontWeight='800';
 if(my)c.appendChild(hcard(my,true,sums[my.id]||0));
 else{const f=el('div','fq');f.appendChild(el('h3','','🙋 Ask for help'));f.appendChild(el('small','mute','Ask only if you truly need it. Honesty first!'));
 const s1=el('select');RS.forEach(x=>s1.appendChild(el('option','',x)));const s2=el('select');[100,250,500].forEach(x=>{const o=el('option','',x+' Heart Points');o.value=x;s2.appendChild(o)});
-const b=el('button','btn','Post my request');b.onclick=async()=>{try{await sb('help_requests',{method:'POST',prefer:'return=minimal',body:JSON.stringify({pid:prog.pid,name:nick(),reason:s1.value,need:+s2.value})});shout('Request posted. Hope dey! 🙏')}catch(e){shout('Could not post. Try again')}renderHelp()};
+const b=el('button','btn','Post my request');b.onclick=async()=>{try{await rpc('ask_help',{p_reason:s1.value,p_need:+s2.value});shout('Request posted. Hope dey! 🙏')}catch(e){shout(String(e.message).includes('already_open')?'You already have an open request':'Could not post. Try again')}renderHelp()};
 f.appendChild(s1);f.appendChild(s2);f.appendChild(b);c.appendChild(f)}
 const others=rq.filter(r=>r.pid!==prog.pid);c.appendChild(el('h3','','Players who need help'));
 if(!others.length)c.appendChild(el('p','mute','No open requests right now. Check back soon!'));
@@ -607,7 +612,7 @@ catch(e){c.innerHTML='<p class="mute">Could not reach the server. Check your con
 let dbx=null,uid=null;
 (async()=>{try{if(window.claude&&claude.use){dbx=await claude.use('db');const u=await claude.use('user');if(u&&u.id)uid=await u.id()}}catch(e){}})();
 const mine=()=>({name:nick(),tot:prog.tot,vp:prog.vp,m:prog.s.filter(Boolean).length,don:Object.values(prog.don).reduce((a,b)=>a+b,0),ts:Date.now()});
-async function syncLB(){if(sbOn()){if(!auth)return;try{const{ts,...o}=mine();await sb('players',{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:JSON.stringify({id:auth.uid,...o,save:snap()})})}catch(e){}return}
+async function syncLB(){if(sbOn())return;
 if(!dbx||!uid)return;try{await dbx.doc('lb/'+uid).set(mine())}catch(e){}}
 async function openLB(f){bk=f;show('lb');$('lbl').innerHTML='<p class="mute">Loading…</p>';await syncLB();renderLB()}
 async function renderLB(){const c=$('lbl');let rows=null;
@@ -625,22 +630,24 @@ const Q=[['🏠','Hope Orphanage Home','Meals, school fees and warm beds for chi
 ['📚','Girl-Child Scholarship','School fees, books and uniforms for girls with big dreams.',2500,'A classroom is full because of you!'],
 ['💧','Clean Water Project','Boreholes so whole villages can drink safe water.',2500,'The tap is running. Thank you!'],
 ['🩺','Free Health Outreach','Free check-ups and medicines for market women and elders.',3500,'Mama said: “God bless you, my child!”']];
-function openFund(f){bk=f;renderFund();show('fund')}
+function openFund(f){bk=f;renderFund();show('fund');if(online())rpc('get_state').then(x=>{applyState(x);renderFund()}).catch(()=>{})}
 function renderFund(){$('wal').textContent='Your wallet: 💚 '+prog.hp+' Heart Points';const c=$('fcards');c.innerHTML='';
 Q.forEach(([ic,n,d,goal,th],k)=>{const got=prog.don[k]||0,full=got>=goal,el=document.createElement('div');el.className='fq';
 el.innerHTML='<h3>'+ic+' '+n+(full?' 🏅':'')+'</h3><small class="mute">'+d+'</small><div class="pb"><div style="width:'+Math.min(100,got/goal*100)+'%"></div></div><small><b>'+got+' / '+goal+'</b></small>'+(full?'<div class="bub">“'+th+'”</div>':'');
 if(!full)[100,500].forEach(a=>{const b=document.createElement('button');b.className='pill';b.textContent='Give '+a;b.disabled=prog.hp<1;b.onclick=()=>give(k,a);el.appendChild(b)});
 c.appendChild(el)})}
-function give(k,a){const goal=Q[k][3],x=Math.min(a,prog.hp,goal-(prog.don[k]||0));if(x<=0)return;
-prog.hp-=x;prog.don[k]=(prog.don[k]||0)+x;save();syncLB();sfx.win();
-if(prog.don[k]>=goal){shout('QUEST COMPLETE! You don change lives! 🏅');burst()}else shout('💚 +'+x+' for '+Q[k][1]);renderFund()}
+async function give(k,a){const goal=Q[k][3],x=Math.min(a,prog.hp,goal-(prog.don[k]||0));if(x<=0)return;
+if(online()){try{applyState(await rpc('donate',{p_k:k,p_amt:x}))}catch(e){shout('Could not send. Try again');return}}
+else{prog.hp-=x;prog.don[k]=(prog.don[k]||0)+x;save();syncLB()}
+sfx.win();if((prog.don[k]||0)>=goal){shout('QUEST COMPLETE! You don change lives! 🏅');burst()}else shout('💚 +'+x+' for '+Q[k][1]);renderFund()}
 /* endings */
-function win(){const left=bonusPts/100,st=left>=8?3:left>=4?2:1,s=S[cur];
-prog.s[cur]=Math.max(prog.s[cur]||0,st);if(cur+1>prog.u&&cur+1<S.length)prog.u=cur+1;
-const earn=Math.floor(score/10)+st*25;prog.hp+=earn;prog.tot+=earn;save();syncLB();sfx.win();burst();shout('MISSION DON LAND! 🏆');
+async function win(){const left=bonusPts/100,st=left>=8?3:left>=4?2:1,s=S[cur];let earn;
+if(online()){try{await pendStart;const r=await rpc('complete_mission',{p_i:cur,p_score:score,p_left:left});applyState(r.state);earn=r.earn}catch(e){ov('<div class="big">⚠️</div><h2>Could not save your result</h2><p class="mute"></p>',[['Try saving again',()=>win()],['Mission map',()=>{renderMap();show('map')},1]]);$('box').querySelector('.mute').textContent=String(e.message||e);return}}
+else{prog.s[cur]=Math.max(prog.s[cur]||0,st);if(cur+1>prog.u&&cur+1<S.length)prog.u=cur+1;earn=Math.floor(score/10)+st*25;prog.hp+=earn;prog.tot+=earn;save();syncLB()}
+sfx.win();burst();shout(cur===239?'The finish line is near! Special awards await… 🏅':'MISSION DON LAND! 🏆');
 const last=cur===S.length-1,th=['Thank you o!','You try well well! 💚','Oshey! You are family now! 🇳🇬'][st-1];
 ov(por(s.av,cur,'big')+'<h2>'+(last?'Naija Champion! 🏆':'Mission complete! 🎉')+'</h2><div class="bub">“'+th+'”<br><small>— '+s.who+'</small></div><div class="bub">🌍 <b>'+s.n+'</b> · '+s.loc+'<br>'+s.fact+'</div><p style="font-size:26px;margin:4px">'+'⭐'.repeat(st)+'</p><p><b>+'+earn+' 💚 Heart Points</b></p><p class="mute">Bond: '+bond(prog.s[cur])+(bonusPts?' · includes '+bonusPts+' extra-move bonus':'')+'</p>',
-(last?[]:[['Next mission ➜',()=>intro(cur+1)]]).concat([['💚 Heart Fund',()=>openFund('map'),1],['Mission map',()=>{renderMap();show('map')},1]]))}
+(last?[['🏅 Hall of Honour',()=>openHall('map')]]:[['Next mission ➜',()=>intro(cur+1)]]).concat([['💚 Heart Fund',()=>openFund('map'),1],['Mission map',()=>{renderMap();show('map')},1]]))}
 function lose(){sfx.lose();const s=S[cur];
 const fin=()=>{loseLife();ov('<div class="big">😅</div><h2>Moves don finish</h2><div class="bub">“No wahala, try again!” <small>— '+s.who+'</small></div><p>You lost a life ❤️ ('+prog.lives+' left)</p>',(prog.lives>0?[['Try again',()=>begin(cur)]]:[]).concat([['Mission map',()=>{renderMap();show('map')},1]]))};
 if(lf.m)ov('<div class="big">🙏</div><h2>Out of moves!</h2><p>Use your ➕5 moves lifeline to keep going?</p>',[['➕5 moves lifeline',()=>{lf.m=0;moves+=5;busy=false;render()}],['Give up',fin,1]]);else fin()}
@@ -649,12 +656,9 @@ const authSave=()=>{try{if(auth)localStorage.setItem('naijaAuth',JSON.stringify(
 async function au(path,body){const r=await fetch(SB.url+'/auth/v1/'+path,{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.msg||j.error_description||j.message||'Something went wrong');return j}
 function setAuth(j){const u=j.user||{},sid=(auth&&auth.sid)||Math.random().toString(36).slice(2)+Date.now().toString(36);auth={access:j.access_token,refresh:j.refresh_token,uid:u.id,email:u.email,name:(u.user_metadata&&u.user_metadata.name)||(auth&&auth.name)||'',sid,exp:Date.now()+((j.expires_in||3600)-60)*1000};prog.pid=auth.uid;authSave();save()}
 async function tok(){if(auth&&Date.now()>auth.exp){try{setAuth(await au('token?grant_type=refresh_token',{refresh_token:auth.refresh}))}catch(e){auth=null;authSave()}}return auth?auth.access:SB.key}
-const snap=()=>({u:prog.u,s:prog.s,hp:prog.hp,tot:prog.tot,don:prog.don,vp:prog.vp,lives:prog.lives});
+const snap=()=>({u:prog.u,s:prog.s,hp:prog.hp,tot:prog.tot,don:prog.don,vp:prog.vp,lives:prog.lives,ch:prog.ch,cert:prog.cert});
 function amsg(t){$('amsg').textContent=t}
-async function loadProfile(force){try{const r=await sb('players?select=name,tot,save&id=eq.'+auth.uid);
-if(r&&r[0]){prog.nm=r[0].name;const sv=r[0].save;if(sv&&(force||(sv.tot||0)>=prog.tot))Object.assign(prog,{u:0,s:[],hp:0,tot:0,don:{},vp:0},sv,{pid:auth.uid,nm:r[0].name});else if(sv)syncLB()}
-else{prog.nm=auth.name||prog.nm||'Player';const{ts,...o}=mine();await sb('players',{method:'POST',prefer:'return=minimal',body:JSON.stringify({id:auth.uid,...o,save:snap()})})}
-if(force)await sb('players?id=eq.'+auth.uid,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify({sid:auth.sid})})}catch(e){}save()}
+async function loadProfile(force){try{await rpc('ensure_player',{p_name:auth.name||prog.nm||'Player'});applyState(await rpc('get_state'));if(force)await rpc('set_session',{p_sid:auth.sid})}catch(e){if(String(e.message).includes('nickname_taken'))amsg('That nickname is taken. Sign out and create an account with another one.')}save()}
 async function doSignin(){const e=$('em').value.trim(),p=$('pw').value;if(!e||p.length<6){amsg('Enter your email and a password of 6+ characters.');return}
 amsg('Signing in…');try{auth=null;setAuth(await au('token?grant_type=password',{email:e,password:p}));await loadProfile(true);renderAuth();amsg('');shout('Welcome, '+nick()+'! 💚')}catch(x){auth=null;amsg(x.message)}}
 async function doSignup(){const e=$('em').value.trim(),p=$('pw').value,n=$('nick').value.trim();
@@ -665,7 +669,51 @@ const j=await au('signup',{email:e,password:p,data:{name:n}});
 if(j.access_token){auth=null;prog.nm=n;setAuth(j);await loadProfile(true);renderAuth();amsg('');shout('Account created! 🎉')}else amsg('Account created! Check your email to confirm it, then sign in.')}catch(x){amsg(x.message)}}
 function renderAuth(){const on=sbOn();$('authbox').style.display=on&&!auth?'block':'none';$('who').style.display=on&&auth?'block':'none';$('nick').style.display=auth?'none':'block';
 if(on&&auth){const w=$('who');w.innerHTML='';w.appendChild(el('p','','Signed in as '+nick()+' ✅'));const b=el('button','pill','Sign out');b.onclick=()=>{auth=null;authSave();try{localStorage.removeItem('naijaCrush')}catch(e){}location.reload()};w.appendChild(b)}}
-async function chk(){if(!auth)return;try{const r=await sb('players?select=sid&id=eq.'+auth.uid);if(r&&r[0]&&r[0].sid&&r[0].sid!==auth.sid){auth=null;authSave();try{localStorage.removeItem('naijaCrush')}catch(e){}ov('<div class="big">🔒</div><h2>Signed out</h2><p>This account was opened on another device.</p>',[['OK',()=>location.reload()]])}}catch(e){}}
+async function chk(){if(!auth)return;try{const ok=await rpc('session_ok',{p_sid:auth.sid});if(ok===false){auth=null;authSave();try{localStorage.removeItem('naijaCrush')}catch(e){}ov('<div class="big">🔒</div><h2>Signed out</h2><p>This account was opened on another device.</p>',[['OK',()=>location.reload()]])}}catch(e){}}
 $('diag').textContent=sbOn()?'Online features connected ✓':(window.NAIJA_CONFIG?'Online sign-in is off: config.js loaded, but supabaseKey is empty.':'Online sign-in is off: config.js was not found. Upload it next to index.html.');$('si').onclick=doSignin;$('su').onclick=doSignup;renderAuth();
 if(auth){loadProfile(false).then(()=>{renderAuth();chk()});setInterval(chk,60000)}
+/* fireside chat */
+$('mchat').onclick=()=>openChat('map');$('mhall').onclick=()=>openHall('map');$('cback').onclick=()=>show(bk);$('hlback').onclick=()=>show(bk);
+let lastSend=0;
+function openChat(f){bk=f;show('chat');const d=D[Math.floor(Date.now()/864e5)%D.length];$('ctopic').textContent='🔥 Tonight’s fireside topic ('+d[0]+'): '+d[1]+' What would you do, and why?';renderChat()}
+async function renderChat(){const c=$('clist');
+if(!sbOn()||!auth){c.innerHTML='';c.appendChild(el('p','mute',sbOn()?'Please sign in on the home screen to join the fireside chat.':'The fireside chat runs in the online version of the game.'));$('csend').disabled=true;return}
+$('csend').disabled=false;
+try{const r=await sb('chat?select=id,uid,name,body,ts&hidden=eq.false&order=ts.desc&limit=50');c.innerHTML='';
+r.reverse().forEach(m=>{const d=el('div','msg'),t=new Date(m.ts);d.appendChild(el('b','',m.name+' '));d.appendChild(document.createTextNode(m.body+' '));d.appendChild(el('small','',t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')));
+if(m.uid!==prog.pid){const f=el('button','',' 🚩');f.style.cssText='border:0;background:none;cursor:pointer;opacity:.5';f.onclick=async()=>{try{await sb('chat_reports',{method:'POST',prefer:'return=minimal',body:JSON.stringify({msg_id:m.id,reporter:prog.pid})});shout('Thanks, we will look at it. 🙏')}catch(e){shout('Already reported')}};d.appendChild(f)}c.appendChild(d)});
+if(!r.length)c.appendChild(el('p','mute','No one has spoken yet. Be the first to warm the fire! 🔥'));c.scrollTop=c.scrollHeight}catch(e){c.innerHTML='<p class="mute">Could not load the chat. Try again.</p>'}}
+$('csend').onclick=async()=>{const i=$('cin'),t=i.value.trim();if(!t||!auth)return;if(Date.now()-lastSend<4000){shout('Easy, take a breath 😄');return}lastSend=Date.now();i.value='';
+try{await sb('chat',{method:'POST',prefer:'return=minimal',body:JSON.stringify({uid:prog.pid,name:nick(),body:t.slice(0,140)})})}catch(e){shout('Could not send. Try again')}renderChat()};
+$('cin').onkeydown=e=>{if(e.key==='Enter')$('csend').click()};
+setInterval(()=>{if($('chat').classList.contains('on'))renderChat()},8000);
+/* awards */
+const AW=[['heart','💚','Best Heart','for generosity and care: funding side quests and helping fellow players.'],['leader','🏆','Leader','for finishing every mission with skill and determination.'],['morals','🕊️','Good Morals','for choosing honesty, integrity and responsibility.']];
+function stats(){return{cnt:prog.s.filter(Boolean).length,stars:prog.s.reduce((a,b)=>a+(b||0),0),good:Object.values(prog.ch||{}).filter(x=>x===1).length,q:Q.filter((x,k)=>(prog.don[k]||0)>=x[3]).length,help:prog.don.h||0}}
+function earned(){const t=stats();return{heart:t.q>=3||t.help>=1000,leader:t.cnt>=S.length&&t.stars>=350,morals:t.good>=200}}
+function hint(k,t){return k==='heart'?'Fund 3 side quests, or give 1,000 points to other players. So far: '+t.q+' quests and '+t.help+' points given.':k==='leader'?'Collect 350 stars across all missions. You have '+t.stars+'.':'Make the honest choice at your first try in 200 missions. You have '+t.good+'.'}
+function openHall(f){bk=f;renderHall();show('hall')}
+function renderHall(){const b=$('hbody');b.innerHTML='';const t=stats();
+if(t.cnt<S.length){b.appendChild(el('p','','Finish all '+S.length+' missions to see your awards. Missions left: '+(S.length-t.cnt)+' 🌍'));return}
+const e=earned();let any=false;b.appendChild(el('p','mute','Congratulations, '+nick()+'! You finished the journey. Here is what you earned:'));
+AW.forEach(([k,ic,n,why])=>{const c=el('div','fq');c.appendChild(el('h3','',ic+' '+n+(e[k]?' ✅':' 🔒')));c.appendChild(el('small','mute',e[k]?'Awarded '+why:hint(k,t)));
+if(e[k]){any=true;const x=el('button','pill','View certificate');x.onclick=()=>showCert(k);c.appendChild(x)}b.appendChild(c)});
+if(!any)b.appendChild(el('p','mute','Keep growing: replay missions to improve your stars and choices, then come back.'));
+if(sbOn()){const v=el('div','fq');v.appendChild(el('h3','','🔎 Verify a certificate'));const i=el('input');i.placeholder='Serial, e.g. NC-ABCD-12345';i.style.cssText='width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--ink)';const r=el('p','mute','');const x=el('button','pill','Check');
+x.onclick=async()=>{try{const q=await sb('certificates?select=name,award&serial=eq.'+encodeURIComponent(i.value.trim().toUpperCase()));r.textContent=q.length?'✅ '+q[0].name+' · '+(AW.find(a=>a[0]===q[0].award)||[0,0,q[0].award])[2]:'No certificate found with that serial.'}catch(e){r.textContent='Could not check right now.'}};
+v.appendChild(i);v.appendChild(x);v.appendChild(r);b.appendChild(v)}}
+async function showCert(k){const a=AW.find(x=>x[0]===k);prog.cert=prog.cert||{};if(!prog.cert[k]){if(online()){try{prog.cert[k]=await rpc('claim_award',{p_award:k});save()}catch(e){shout('Not eligible yet');return}}else{prog.cert[k]='NC-'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Date.now().toString(36).toUpperCase().slice(-5);save()}}
+const ser=prog.cert[k],cv=document.createElement('canvas');cv.width=1200;cv.height=850;const x=cv.getContext('2d');if(!x)return;
+x.fillStyle='#fffaf0';x.fillRect(0,0,1200,850);
+x.lineWidth=28;x.strokeStyle='#008751';x.strokeRect(24,24,1152,802);x.lineWidth=8;x.strokeStyle='#f2a900';x.strokeRect(52,52,1096,746);x.lineWidth=2;x.strokeStyle='#008751';x.strokeRect(66,66,1068,718);
+x.textAlign='center';x.fillStyle='#008751';x.font='bold 30px Georgia,serif';x.fillText('NAIJA CRUSH · 🇳🇬',600,140);
+x.fillStyle='#10301b';x.font='bold 64px Georgia,serif';x.fillText('Certificate of Honour',600,235);
+x.fillStyle='#52705b';x.font='26px Georgia,serif';x.fillText('This certificate is proudly awarded to',600,315);
+x.fillStyle='#b87d00';x.font='bold 76px Georgia,serif';x.fillText(nick(),600,415);
+x.fillStyle='#10301b';x.font='bold 50px Georgia,serif';x.fillText(a[1]+' '+a[2],600,505);
+x.fillStyle='#52705b';x.font='26px Georgia,serif';let ln='',y=565;('Awarded '+a[3]+' After 250 missions across the cultures of Nigeria.').split(' ').forEach(w=>{if(x.measureText(ln+w).width>900){x.fillText(ln,600,y);y+=36;ln=''}ln+=w+' '});x.fillText(ln,600,y);
+x.font='22px Georgia,serif';x.textAlign='left';x.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}),120,740);x.textAlign='right';x.fillText('Serial '+ser,1080,740);
+x.textAlign='center';x.font='italic 30px Georgia,serif';x.fillStyle='#008751';x.fillText('Mama Naija',600,730);x.fillStyle='#52705b';x.font='18px Georgia,serif';x.fillText('Honesty · Integrity · Responsibility',600,765);
+ov('<div id="cw"></div>',[['Close',()=>{},1]]);const im=new Image();im.src=cv.toDataURL('image/png');im.className='cert';$('cw').appendChild(im);
+const dl=el('a','btn','⬇ Download');dl.href=im.src;dl.download='naija-crush-'+k+'.png';dl.style.cssText='display:inline-block;text-decoration:none';$('cw').appendChild(dl)}
 </script></body></html>
